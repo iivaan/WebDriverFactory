@@ -142,6 +142,15 @@ public class Configs {
     public static void main(String[] args) {
         log.debug(ConfigFactory.load().root().render(ConfigRenderOptions.concise()));
 
-        //newBuilder().withSystemEnvironment().withSystemProperties().build();
+        Config config =  newBuilder()
+                            //.withResource(System.getProperty("user.dir") + "/src/test/resources/application.conf")
+                            .withResource("driver-factory.config")
+                            .withSystemEnvironment()
+                            .withSystemProperties()
+                            .build();
+
+        System.out.println(config.getString("user.dir"));
+        System.out.println(config.getString("browser.chrome.path"));
+
     }
 }

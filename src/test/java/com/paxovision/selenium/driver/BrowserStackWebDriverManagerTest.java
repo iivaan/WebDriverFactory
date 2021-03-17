@@ -1,25 +1,18 @@
 package com.paxovision.selenium.driver;
 
-import com.paxovision.selenium.driver.WebDriverFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class WebDriverManagerTest {
+public class BrowserStackWebDriverManagerTest {
     static{
-        //System.setProperty("WEB_DRIVER_TYPE","REMOTE-WEB-DRIVER");
-        System.setProperty("WEB_DRIVER_TYPE","CHROME");
+        System.setProperty("WEB_DRIVER_TYPE","REMOTE-BROWSERSTACK");
+        System.setProperty("CAPABILITY","mac.chrome");
     }
-
-    //private static WebDriverFactory driverFactory = WebDriverFactory.getInstance("CHROME");
-    //private static WebDriverFactory driverFactory = WebDriverFactory.getInstance("CHROME-HEADLESS");
-    //private static WebDriverFactory driverFactory = WebDriverFactory.getInstance("FIREFOX");
-    //private static WebDriverFactory driverFactory = WebDriverFactory.getInstance("FIREFOX-HEADLESS");
     private  WebDriverFactory driverFactory = WebDriverFactory.getInstance();
     protected WebDriver driver;
 

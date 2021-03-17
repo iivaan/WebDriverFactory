@@ -1,7 +1,5 @@
 package com.paxovision.selenium.driver;
 
-import io.github.bonigarcia.wdm.managers.ChromeDriverManager;
-import io.github.bonigarcia.wdm.managers.FirefoxDriverManager;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -26,101 +24,108 @@ public class WebDriverFactory {
     //private static final String USERNAME = "azfarlodi1";
     //private static final String AUTOMATE_KEY = "gaHiesWUTssKhwxGuGG7";
     //private static final String CLOUD_GRID_URL = "https://" + USERNAME + ":" + AUTOMATE_KEY + "@hub-cloud.browserstack.com/wd/hub";
-    private static final String USERNAME = "bahjatkhan1";
-    private static final String AUTOMATE_KEY = "TbVWMFj8YNcEMSkvwoqt";
-    private static final String CLOUD_GRID_URL = "https://" + USERNAME + ":" + AUTOMATE_KEY + "@hub-cloud.browserstack.com/wd/hub";
+    //private static final String USERNAME = "bahjatkhan1";
+    //private static final String AUTOMATE_KEY = "TbVWMFj8YNcEMSkvwoqt";
+    //private static final String CLOUD_GRID_URL = "https://" + USERNAME + ":" + AUTOMATE_KEY + "@hub-cloud.browserstack.com/wd/hub";
 
     private static Logger logger = LoggerFactory.getLogger(WebDriverFactory.class);
 
 
     private WebDriverFactory(){
+
     }
 
     public static WebDriverFactory getInstance(){
-        String browser = System.getenv("browser");
-        return getInstance(browser);
+        String webDriverType = System.getenv("WEB_DRIVER_TYPE");
+        if(webDriverType == null || webDriverType.isEmpty()){
+            webDriverType = System.getProperty("WEB_DRIVER_TYPE");
+        }
+        return getInstance(webDriverType);
     }
 
-    public static WebDriverFactory getInstance(String browser){
+    public static WebDriverFactory getInstance(String webDriverType){
         WebDriverFactoryConfig config = WebDriverFactoryConfig.getInstance();
 
         if(instance == null){
             instance = new WebDriverFactory();
         }
 
-        if (browser == null) {
-            browser = "CHROME";
-            logger.info("Browser is missing. Using default browser {}", browser);
+        if (webDriverType == null) {
+            webDriverType = "CHROME";
+            logger.info("Browser is missing. Using default browser {}", webDriverType);
         }
 
         if(instance.driverCollection.get() == null) {
 
-            logger.info("Creating browser instance {} ", browser);
+            logger.info("Creating browser instance {} ", webDriverType);
 
             WebDriver driver = null;
-            if(browser.toUpperCase().contentEquals("CHROME")) {
-                System.setProperty(WebDriverFactoryConfig.ChromeConfig.DRIVER_KEY,
-                                config.getChromeConfig().getChromeDriverExecutable());
-                ChromeOptions options = config.getChromeConfig().getOptions();
+            if(webDriverType.toUpperCase().contentEquals("CHROME")) {
+                WebDriverFactoryConfig.ChromeConfig chromeConfig = config.getChromeConfig(false);
+
+                logger.info("Driver Key: {}", chromeConfig.getDriverKey());
+                logger.info("Driver Path: {}", chromeConfig.getChromeDriverExecutable());
+                System.setProperty(chromeConfig.getDriverKey(),chromeConfig.getChromeDriverExecutable());
+                ChromeOptions options = chromeConfig.getOptions();
                 DesiredCapabilities capabilities = new DesiredCapabilities();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
-
                 options.merge(capabilities);
-                driver = new ChromeDriver(options);
 
-                //ChromeOptions options = new ChromeOptions();
-                //options.addArguments("--ignore-certificate-errors");
+                logger.info("Options: {}",  options.asMap());
 
-                //ChromeDriverManager.chromedriver().setup();
-                //driver = new ChromeDriver(options);
-            }
-            else if(browser.toUpperCase().contentEquals("CHROME-HEADLESS")) {
-
-                ChromeOptions options = new ChromeOptions();
-                options.addArguments("--headless")
-                        .addArguments("--disable-gpu")
-                        .addArguments("--window-size=1920,1080")
-                        .addArguments("--ignore-certificate-errors");
-
-                //options.setBinary("/Path/to/specific/version/of/Google Chrome");
-                ChromeDriverManager.chromedriver().setup();
                 driver = new ChromeDriver(options);
             }
-            else if(browser.toUpperCase().contentEquals("CHROME-GRID")) {
-                DesiredCapabilities caps = new DesiredCapabilities();
-                caps.setPlatform(Platform.ANY);
-                caps.setBrowserName("chrome");
-                try {
-                    driver = new RemoteWebDriver(new URL(LOCAL_GRID_URL),caps);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+            else if(webDriverType.toUpperCase().contentEquals("CHROME-HEADLESS")) {
+                WebDriverFactoryConfig.ChromeConfig chromeConfig = config.getChromeConfig(true);
+
+                logger.info("Driver Key: {}", chromeConfig.getDriverKey());
+                logger.info("Driver Path: {}", chromeConfig.getChromeDriverExecutable());
+                System.setProperty(chromeConfig.getDriverKey(),chromeConfig.getChromeDriverExecutable());
+                ChromeOptions options = chromeConfig.getOptions();
+                DesiredCapabilities capabilities = new DesiredCapabilities();
+                capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+                options.merge(capabilities);
+
+                logger.info("Options: {}",  options.asMap());
+
+                driver = new ChromeDriver(options);
             }
-            else if(browser.toUpperCase().contentEquals("CHROME-CLOUD")){
-                DesiredCapabilities caps = new DesiredCapabilities();
-                caps.setCapability("browser", "Chrome");
-                caps.setCapability("browser_version", "77.0");
-                caps.setCapability("os", "Windows");
-                caps.setCapability("os_version", "10");
-                caps.setCapability("resolution", "1920x1080");
-                caps.setCapability("name", "Cloud-Browser");
-                try {
-                    driver = new RemoteWebDriver(new URL(CLOUD_GRID_URL),caps);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            }
-            else if(browser.toUpperCase().contentEquals("FIREFOX")) {
-                FirefoxDriverManager.firefoxdriver().arch64().setup();
-                FirefoxOptions options = new FirefoxOptions();
-                options.setCapability("marionette", true);
+            else if(webDriverType.toUpperCase().contentEquals("FIREFOX")) {
+                WebDriverFactoryConfig.FirefoxConfig firefoxConfig = config.getFirefoxConfig(false);
+
+                logger.info("Driver Key: {}", firefoxConfig.getDriverKey());
+                logger.info("Driver Path: {}", firefoxConfig.getChromeDriverExecutable());
+                System.setProperty(firefoxConfig.getDriverKey(),firefoxConfig.getChromeDriverExecutable());
+                FirefoxOptions options = firefoxConfig.getOptions();
+
+                logger.info("Options: {}",  options.asMap());
 
                 driver = new FirefoxDriver(options);
             }
-            else if(browser.toUpperCase().contentEquals("FIREFOX-HEADLESS")) {
+            else if(webDriverType.toUpperCase().contentEquals("FIREFOX-HEADLESS")) {
+                WebDriverFactoryConfig.FirefoxConfig firefoxConfig = config.getFirefoxConfig(true);
 
+                logger.info("Driver Key: {}", firefoxConfig.getDriverKey());
+                logger.info("Driver Path: {}", firefoxConfig.getChromeDriverExecutable());
+                System.setProperty(firefoxConfig.getDriverKey(),firefoxConfig.getChromeDriverExecutable());
+                FirefoxOptions options = firefoxConfig.getOptions();
+
+                logger.info("Options: {}",  options.asMap());
+
+                driver = new FirefoxDriver(options);
             }
-            else if(browser.toUpperCase().contentEquals("FIREFOX-GRID")) {
+            else if(webDriverType.toUpperCase().contentEquals("REMOTE-BROWSERSTACK")){
+                WebDriverFactoryConfig.RemoteBrowserstackWebDriverConfig remoteWebDriverConfig = config.getRemoteBrowserstackDriverConfig();
+
+                DesiredCapabilities capabilities = remoteWebDriverConfig.getDesiredCapabilities();
+                URL remoteWebDriverUrl = remoteWebDriverConfig.getRemoteWebDriverUrl();
+
+                logger.info("DesiredCapabilities: {}", capabilities);
+                logger.info("RemoteWebDriverUrl: {}", remoteWebDriverUrl);
+
+                driver = new RemoteWebDriver(remoteWebDriverUrl,capabilities);
+            }
+            else if(webDriverType.toUpperCase().contentEquals("GRID")) {
                 DesiredCapabilities caps = new DesiredCapabilities();
                 caps.setPlatform(Platform.ANY);
                 caps.setBrowserName("firefox");
@@ -129,25 +134,7 @@ public class WebDriverFactory {
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
-                //FirefoxOptions options = new FirefoxOptions();
-                //options.setCapability("marionette", true);
-                //driver = new FirefoxDriver(options);
             }
-            else if(browser.toUpperCase().contentEquals("FIREFOX-CLOUD")){
-                DesiredCapabilities caps = new DesiredCapabilities();
-                caps.setCapability("browser", "Firefox");
-                caps.setCapability("browser_version", "70.0");
-                caps.setCapability("os", "Windows");
-                caps.setCapability("os_version", "10");
-                caps.setCapability("resolution", "1920x1080");
-                caps.setCapability("name", "Cloud-Browser");
-                try {
-                    driver = new RemoteWebDriver(new URL(CLOUD_GRID_URL),caps);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            }
-
             instance.driverCollection.set(driver);
         }
         return instance;
@@ -158,7 +145,7 @@ public class WebDriverFactory {
         return driverCollection.get();
     }
 
-    public void removeDriver() {
+    public void quite() {
         logger.info("Quiting the driver and closes the browser");
         try {
             driverCollection.get().close();
